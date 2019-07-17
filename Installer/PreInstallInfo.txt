@@ -1,0 +1,5 @@
+Installation Information
+
+This installation will update / replace any previous installation, and will retain all of your settings and other information.  
+
+It will close the application if it is currently running.

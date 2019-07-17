@@ -1,0 +1,62 @@
+SOFTWARE LICENSE AGREEMENT
+
+In English:  Basically, the software is free.  Im not responsible for any problems caused by the software.  You can't change or sell the software without the Author's written consent.  The author retains all rights and ownership of the software, but you are allowed to use it. The software is covered by all standard copyright laws in Australia, and the stuff below.
+
+SPECIAL NOTE: The information and processes in this application are not considered professional advice for health and wellbeing. If you are having serious problems, of course go and see your GP.
+
+
+This Software License Agreement ("Agreement") is made and effective this 1st August, 2017 by and between Strangetimez ("Developer") and YOU ("Licensee").
+
+Developer has developed and licenses to users its software program marketed under the name Rest Relax Reminder (RRR) (the "Software").
+
+Licensee desires to utilize a copy of the Software.
+
+NOW, THEREFORE, in consideration of the mutual promises set forth herein, Developer and Licensee agree as follows:
+
+1. License.
+Developer hereby grants to Licensee a perpetual, non-exclusive, limited license to use the Software in any country, as set forth in this Agreement.
+
+2. Restrictions.
+Licensee shall not modify, copy, duplicate, reproduce, sell, license or sublicense the Software, or transfer or convey the Software or any right in the Software to anyone else without the prior written consent of Developer; provided that Licensee may make one copy of the Software for backup or archival purposes. 
+
+3. Fee.
+In consideration for the grant of the license and the use of the Software, Licensee agrees to pay Developer the sum of license fee (Currently Free but subject to change without notice).
+
+4. Warranty of Title.
+Developer hereby represents and warrants to Licensee that Developer is the owner of the Software or otherwise has the right to grant to Licensee the rights set forth in this Agreement. In the event any breach or threatened breach of the foregoing representation and warranty, Licensee's sole remedy shall be to require Developer or to either: i) procure, at Developer's expense, the right to use the Software, ii) replace the Software or any part thereof that is in breach and replace it with Software of comparable functionality that does not cause any breach, or iii) refund to Licensee the full amount of the license fee upon the return of the Software and all copies thereof to Developer.
+
+5. Warranty of Functionality.
+A. Developer warrants that the Software shall perform in all material respects according to the Developer's specifications concerning the Software when used with the appropriate computer equipment. In the event of any breach or alleged breach of this warranty, Liscensee shall promptly notify Developer. The Developer may correct the Software so that it operates according to the warranty. This warranty shall not apply to the Software if modified by anyone or if used improperly or on an operating environment not approved by Liscensor.
+
+6. Payment.
+Currently this software is FREE.
+
+
+7. Warranty Disclaimer.
+DEVELOPER'S WARRANTIES SET FORTH IN THIS AGREEMENT ARE EXCLUSIVE AND ARE IN LIEU OF ALL OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+8. Limitation of Liability.
+Developer shall not be responsible for, and shall not pay, any amount of incidental, consequential or other indirect damages, whether based on lost revenue or otherwise, regardless of whether Developer was advised of the possibility of such losses in advance. In no event shall Developer's liability hereunder exceed the amount of license fees paid by Licensee, regardless of whether Licensee's claim is based on contract, tort, strict liability, product liability or otherwise.
+
+9. Notice.
+Any notice required by this Agreement or given in connection with it, shall be in writing and shall be given to the appropriate party by email
+
+
+    If to Developer:
+    Troy@strangetimez.com
+
+
+10. Governing Law.
+This Agreement shall be construed and enforced in accordance with the laws of the country of Australia.
+
+11. No Assignment.
+Neither this Agreement nor any interest in this Agreement may be assigned by Licensee without the prior express written approval of Developer.
+
+12. Final Agreement.
+This Agreement terminates and supersedes all prior understandings or agreements on the subject matter hereof. This Agreement may be modified only by a further writing that is duly executed by both parties.
+
+13. Severability.
+If any term of this Agreement is held by a court of competent jurisdiction to be invalid or unenforceable, then this Agreement, including all of the remaining terms, will remain in full force and effect as if such invalid or unenforceable term had never been included.
+
+15. Headings.
+Headings used in this Agreement are provided for convenience only and shall not be used to construe meaning or intent.
