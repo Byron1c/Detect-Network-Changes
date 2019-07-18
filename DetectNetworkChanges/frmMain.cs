@@ -77,6 +77,7 @@ namespace DetectNetworkChanges
             if (Properties.Settings.Default.StartMinimized)
             {
                 this.WindowState = FormWindowState.Minimized;
+                //this.ShowInTaskbar = false;
             }
 
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
@@ -255,6 +256,7 @@ namespace DetectNetworkChanges
                 notifyIcon1.Visible = false;
                 this.Show();
                 WindowState = FormWindowState.Normal;
+                this.ShowInTaskbar = true;
 
                 this.BringToFront();
                 this.Focus();
@@ -386,20 +388,17 @@ namespace DetectNetworkChanges
         /// <param name="vBalloonShowSeconds"></param>
         private void showBalloon(string title, string body, Boolean vTesting, int vBalloonShowSeconds)
         {
+            //NotifyIcon niBalloon;
+
             try
             {
 
-                if (notifyIcon1 != null)
-                {
-                    notifyIcon1.Dispose();
-                }
-
-                notifyIcon1 = new NotifyIcon
-                {
-                    Icon = new Icon(Application.StartupPath + @"\Icon.ico"),
-                    Visible = true,
-                    BalloonTipIcon = ToolTipIcon.None
-                };
+                //niBalloon = new NotifyIcon
+                //{
+                //    Icon = new Icon(Application.StartupPath + @"\Icon.ico"),
+                //    Visible = true,
+                //    BalloonTipIcon = ToolTipIcon.None
+                //};
                 notifyIcon1.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
 
                 if (title != null)
@@ -539,6 +538,7 @@ namespace DetectNetworkChanges
             cbStartMinimised.Checked = Properties.Settings.Default.StartMinimized;
             cbShowBalloon.Checked = Properties.Settings.Default.ShowBalloon;
             cbShowPopup.Checked = Properties.Settings.Default.ShowPopup;
+            cbPlaySound.Checked = Properties.Settings.Default.PlaySound;
 
             fillNetworkList(Properties.Settings.Default.NetworkToCheck, NetworkConnectivityLevels.All);
         }
