@@ -74,18 +74,20 @@ namespace DetectNetworkChanges
             tmrMain.Interval = Properties.Settings.Default.CheckSeconds * 1000;
             tmrMain.Start();
 
-            if (Properties.Settings.Default.StartMinimized)
-            {
-                this.WindowState = FormWindowState.Minimized;
-                //this.ShowInTaskbar = false;
-            }
-
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
             NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
 
             this.FormClosing += FrmMain_FormClosing;
             this.Resize += FrmMain_Resize;
             this.notifyIcon1.MouseClick += NotifyIcon1_MouseClick;
+
+            if (Properties.Settings.Default.StartMinimized)
+            {
+                this.WindowState = FormWindowState.Minimized;
+                //this.ShowInTaskbar = false;
+
+                this.Hide();
+            }
         }
 
 
@@ -143,6 +145,7 @@ namespace DetectNetworkChanges
             if (Properties.Settings.Default.NetworkToCheck != cbNetwork.SelectedItem.ToString())
             {
                 btnSetNetwork.Enabled = true;
+                btnSetNetwork.Text = "Set Network Info";
             }
             else
             {
@@ -169,7 +172,7 @@ namespace DetectNetworkChanges
             doMainTimerTick();
 
             cbNetwork.Enabled = true;
-            btnSetNetwork.Text = "Set Network";
+            btnSetNetwork.Text = "Set Network Info";
 
         }
 
@@ -361,6 +364,7 @@ namespace DetectNetworkChanges
                 lblState.Text = "r"; // Webdings X
                 lblState.ForeColor = Color.OrangeRed;
                 btnSetNetwork.Enabled = true;
+                btnSetNetwork.Text = "Update Network Info";
 
                 tmrMain.Start();
             }
@@ -375,6 +379,8 @@ namespace DetectNetworkChanges
                     ProblemFound = false;
                     notifyIcon1.Icon = new System.Drawing.Icon(Application.StartupPath + @"\Icon.ico");
                 }
+
+                btnSetNetwork.Text = "Set Network Info";
             }
         }
 

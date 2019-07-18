@@ -296,11 +296,11 @@
             // btnSetNetwork
             // 
             this.btnSetNetwork.Enabled = false;
-            this.btnSetNetwork.Location = new System.Drawing.Point(224, 85);
+            this.btnSetNetwork.Location = new System.Drawing.Point(208, 85);
             this.btnSetNetwork.Name = "btnSetNetwork";
-            this.btnSetNetwork.Size = new System.Drawing.Size(81, 23);
+            this.btnSetNetwork.Size = new System.Drawing.Size(97, 23);
             this.btnSetNetwork.TabIndex = 6;
-            this.btnSetNetwork.Text = "Set Network";
+            this.btnSetNetwork.Text = "Set Network Info";
             this.toolTip1.SetToolTip(this.btnSetNetwork, "Press to set the chosen network to be the one monitored");
             this.btnSetNetwork.UseVisualStyleBackColor = true;
             this.btnSetNetwork.Click += new System.EventHandler(this.btnSetNetwork_Click);
