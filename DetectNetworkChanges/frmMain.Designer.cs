@@ -36,6 +36,9 @@
             this.cbNetwork = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label6 = new System.Windows.Forms.Label();
+            this.lblLinkSpeed = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
             this.lblConnectedToInternet = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.lblConnected = new System.Windows.Forms.Label();
@@ -54,6 +57,8 @@
             this.btnSetNetwork = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cbShowBalloon = new System.Windows.Forms.CheckBox();
@@ -61,11 +66,16 @@
             this.cbStartMinimised = new System.Windows.Forms.CheckBox();
             this.cbAutoStart = new System.Windows.Forms.CheckBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.numLinkSpeedMin = new System.Windows.Forms.NumericUpDown();
             this.cbPlaySound = new System.Windows.Forms.CheckBox();
+            this.cbCheckLinkSpeed = new System.Windows.Forms.CheckBox();
+            this.lblWarn = new System.Windows.Forms.Label();
+            this.lblMbps = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numCheckSecs)).BeginInit();
             this.panel1.SuspendLayout();
             this.cmNotify.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numLinkSpeedMin)).BeginInit();
             this.SuspendLayout();
             // 
             // tmrMain
@@ -122,7 +132,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 61);
+            this.label2.Location = new System.Drawing.Point(12, 61);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(47, 13);
             this.label2.TabIndex = 4;
@@ -133,6 +143,9 @@
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.label6);
+            this.panel1.Controls.Add(this.lblLinkSpeed);
+            this.panel1.Controls.Add(this.label8);
             this.panel1.Controls.Add(this.lblConnectedToInternet);
             this.panel1.Controls.Add(this.label9);
             this.panel1.Controls.Add(this.lblConnected);
@@ -145,10 +158,39 @@
             this.panel1.Controls.Add(this.label5);
             this.panel1.Controls.Add(this.label4);
             this.panel1.Controls.Add(this.label3);
-            this.panel1.Location = new System.Drawing.Point(12, 141);
+            this.panel1.Location = new System.Drawing.Point(12, 168);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(294, 128);
+            this.panel1.Size = new System.Drawing.Size(294, 154);
             this.panel1.TabIndex = 5;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(115, 110);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(37, 13);
+            this.label6.TabIndex = 20;
+            this.label6.Text = "Mbps";
+            // 
+            // lblLinkSpeed
+            // 
+            this.lblLinkSpeed.AutoSize = true;
+            this.lblLinkSpeed.Location = new System.Drawing.Point(78, 110);
+            this.lblLinkSpeed.Name = "lblLinkSpeed";
+            this.lblLinkSpeed.Size = new System.Drawing.Size(31, 13);
+            this.lblLinkSpeed.TabIndex = 19;
+            this.lblLinkSpeed.Text = "9999";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(1, 110);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(71, 13);
+            this.label8.TabIndex = 18;
+            this.label8.Text = "Link Speed";
             // 
             // lblConnectedToInternet
             // 
@@ -194,7 +236,7 @@
             this.lblState.AutoSize = true;
             this.lblState.Font = new System.Drawing.Font("Webdings", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
             this.lblState.ForeColor = System.Drawing.Color.OrangeRed;
-            this.lblState.Location = new System.Drawing.Point(235, 79);
+            this.lblState.Location = new System.Drawing.Point(235, 105);
             this.lblState.Name = "lblState";
             this.lblState.Size = new System.Drawing.Size(70, 49);
             this.lblState.TabIndex = 13;
@@ -206,7 +248,7 @@
             this.lblLastChecked.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblLastChecked.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLastChecked.Location = new System.Drawing.Point(0, 109);
+            this.lblLastChecked.Location = new System.Drawing.Point(0, 135);
             this.lblLastChecked.Name = "lblLastChecked";
             this.lblLastChecked.Padding = new System.Windows.Forms.Padding(2);
             this.lblLastChecked.Size = new System.Drawing.Size(292, 17);
@@ -277,6 +319,7 @@
             this.notifyIcon1.ContextMenuStrip = this.cmNotify;
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "Detect Network Changes";
+            this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
             // cmNotify
@@ -319,15 +362,29 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.resetSettingsToolStripMenuItem,
+            this.toolStripMenuItem1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             // 
+            // resetSettingsToolStripMenuItem
+            // 
+            this.resetSettingsToolStripMenuItem.Name = "resetSettingsToolStripMenuItem";
+            this.resetSettingsToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.resetSettingsToolStripMenuItem.Text = "&Reset Settings";
+            this.resetSettingsToolStripMenuItem.Click += new System.EventHandler(this.resetSettingsToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(144, 6);
+            // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(93, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -340,8 +397,10 @@
             // 
             // cbShowBalloon
             // 
+            this.cbShowBalloon.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cbShowBalloon.AutoSize = true;
-            this.cbShowBalloon.Location = new System.Drawing.Point(12, 118);
+            this.cbShowBalloon.Location = new System.Drawing.Point(12, 145);
             this.cbShowBalloon.Name = "cbShowBalloon";
             this.cbShowBalloon.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.cbShowBalloon.Size = new System.Drawing.Size(85, 17);
@@ -352,8 +411,10 @@
             // 
             // cbShowPopup
             // 
+            this.cbShowPopup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cbShowPopup.AutoSize = true;
-            this.cbShowPopup.Location = new System.Drawing.Point(121, 118);
+            this.cbShowPopup.Location = new System.Drawing.Point(121, 145);
             this.cbShowPopup.Name = "cbShowPopup";
             this.cbShowPopup.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.cbShowPopup.Size = new System.Drawing.Size(81, 17);
@@ -386,10 +447,37 @@
             this.cbAutoStart.UseVisualStyleBackColor = true;
             this.cbAutoStart.CheckedChanged += new System.EventHandler(this.cbAutoStart_CheckedChanged);
             // 
+            // numLinkSpeedMin
+            // 
+            this.numLinkSpeedMin.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numLinkSpeedMin.Increment = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            this.numLinkSpeedMin.Location = new System.Drawing.Point(230, 115);
+            this.numLinkSpeedMin.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.numLinkSpeedMin.Name = "numLinkSpeedMin";
+            this.numLinkSpeedMin.Size = new System.Drawing.Size(51, 20);
+            this.numLinkSpeedMin.TabIndex = 14;
+            this.toolTip1.SetToolTip(this.numLinkSpeedMin, "How often to check");
+            this.numLinkSpeedMin.Value = new decimal(new int[] {
+            2999,
+            0,
+            0,
+            0});
+            this.numLinkSpeedMin.ValueChanged += new System.EventHandler(this.numLinkSpeedMin_ValueChanged);
+            // 
             // cbPlaySound
             // 
+            this.cbPlaySound.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cbPlaySound.AutoSize = true;
-            this.cbPlaySound.Location = new System.Drawing.Point(224, 118);
+            this.cbPlaySound.Location = new System.Drawing.Point(224, 145);
             this.cbPlaySound.Name = "cbPlaySound";
             this.cbPlaySound.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.cbPlaySound.Size = new System.Drawing.Size(80, 17);
@@ -398,11 +486,46 @@
             this.cbPlaySound.UseVisualStyleBackColor = true;
             this.cbPlaySound.CheckedChanged += new System.EventHandler(this.cbPlaySound_CheckedChanged);
             // 
+            // cbCheckLinkSpeed
+            // 
+            this.cbCheckLinkSpeed.AutoSize = true;
+            this.cbCheckLinkSpeed.Location = new System.Drawing.Point(12, 116);
+            this.cbCheckLinkSpeed.Name = "cbCheckLinkSpeed";
+            this.cbCheckLinkSpeed.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.cbCheckLinkSpeed.Size = new System.Drawing.Size(114, 17);
+            this.cbCheckLinkSpeed.TabIndex = 13;
+            this.cbCheckLinkSpeed.Text = "Check Link Speed";
+            this.cbCheckLinkSpeed.UseVisualStyleBackColor = true;
+            this.cbCheckLinkSpeed.CheckedChanged += new System.EventHandler(this.cbCheckLinkSpeed_CheckedChanged);
+            // 
+            // lblWarn
+            // 
+            this.lblWarn.AutoSize = true;
+            this.lblWarn.Location = new System.Drawing.Point(132, 117);
+            this.lblWarn.Name = "lblWarn";
+            this.lblWarn.Size = new System.Drawing.Size(92, 13);
+            this.lblWarn.TabIndex = 15;
+            this.lblWarn.Text = "Warn when under";
+            // 
+            // lblMbps
+            // 
+            this.lblMbps.AutoSize = true;
+            this.lblMbps.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMbps.Location = new System.Drawing.Point(282, 117);
+            this.lblMbps.Name = "lblMbps";
+            this.lblMbps.Size = new System.Drawing.Size(33, 13);
+            this.lblMbps.TabIndex = 21;
+            this.lblMbps.Text = "Mbps";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(318, 281);
+            this.ClientSize = new System.Drawing.Size(318, 334);
+            this.Controls.Add(this.lblMbps);
+            this.Controls.Add(this.lblWarn);
+            this.Controls.Add(this.numLinkSpeedMin);
+            this.Controls.Add(this.cbCheckLinkSpeed);
             this.Controls.Add(this.cbPlaySound);
             this.Controls.Add(this.cbStartMinimised);
             this.Controls.Add(this.cbAutoStart);
@@ -430,6 +553,7 @@
             this.cmNotify.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numLinkSpeedMin)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -468,6 +592,15 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label lblConnected;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label lblLinkSpeed;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.CheckBox cbCheckLinkSpeed;
+        private System.Windows.Forms.NumericUpDown numLinkSpeedMin;
+        private System.Windows.Forms.Label lblWarn;
+        private System.Windows.Forms.Label lblMbps;
+        private System.Windows.Forms.ToolStripMenuItem resetSettingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
     }
 }
 

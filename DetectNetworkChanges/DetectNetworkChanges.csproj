@@ -114,6 +114,8 @@
     <Content Include="Icon_Problem.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="latestchanges.txt" />
+    <Content Include="latestversion.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

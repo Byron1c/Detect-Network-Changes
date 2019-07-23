@@ -62,7 +62,7 @@
             // 
             // txtDescription
             // 
-            this.txtDescription.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.txtDescription.BackColor = System.Drawing.SystemColors.Control;
             this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDescription.Location = new System.Drawing.Point(178, 160);
             this.txtDescription.Multiline = true;

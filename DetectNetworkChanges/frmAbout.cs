@@ -104,7 +104,7 @@ namespace DetectNetworkChanges
 
         internal static void OpenAppURL()
         {
-            System.Diagnostics.Process.Start("https://www.strangetimez.com/Blog/"); //TODO: create a blog page and put the link here
+            System.Diagnostics.Process.Start("https://www.strangetimez.com/Blog/detect-network-changes-application/"); //TODO: create a blog page and put the link here
         }
     }
 }

@@ -173,6 +173,32 @@ namespace DetectNetworkChanges.Objects
         }
 
 
+
+        public static void getCurrentLinkSpeed(Guid vAdapterID, out long vSpeed)
+        {
+            vSpeed = 0;
+
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                //if (ni.Id.ToUpper().Replace("{", "").Replace("}", "") == vNicID.ToUpper())
+                if (ni.Id.Contains(vAdapterID.ToString().ToUpper()))
+                    if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet || ni.NetworkInterfaceType == NetworkInterfaceType.GigabitEthernet)
+                    {
+                        //Console.WriteLine(ni.Name);
+                        foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                        {
+                            if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            {
+                                vSpeed = ni.Speed / 1000 / 1000;
+                                break;
+                            }
+                        }
+                    }
+            }
+
+        }
+
+
         /// <summary>
         /// Get the description of the adapter from the Adapter ID
         /// </summary>

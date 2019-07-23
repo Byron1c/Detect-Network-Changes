@@ -1,3 +1,3 @@
-"C:\Program Files (x86)\Inno Setup 5\ISCC.exe" DetectNetworkChanges.iss 
+"C:\Users\Troy\AppData\Local\Programs\Inno Setup 6\ISCC.exe" DetectNetworkChanges.iss 
 rem copy.bat
 pause

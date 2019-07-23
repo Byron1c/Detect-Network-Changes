@@ -18,6 +18,7 @@ namespace DetectNetworkChanges.Objects
         internal string NetworkName = string.Empty;
         internal Boolean IsConnected = false;
         internal Boolean IsConnectedToInternet = false;
+        internal long LinkSpeed = 0;
 
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace DetectNetworkChanges.Objects
 
             NetworkName = NetworkFunctions.getNetworkName(netID, NetworkConnectivityLevels.All);
             AdapterName = NetworkFunctions.getAdapterDescription(adapterID);
+            NetworkFunctions.getCurrentLinkSpeed(adapterID, out LinkSpeed);
         }
 
 
@@ -51,6 +53,7 @@ namespace DetectNetworkChanges.Objects
 
             NetworkName = NetworkFunctions.getNetworkName(netID, NetworkConnectivityLevels.All);
             AdapterName = NetworkFunctions.getAdapterDescription(adapterID);
+            NetworkFunctions.getCurrentLinkSpeed(adapterID, out LinkSpeed);
         }
 
 
@@ -63,7 +66,8 @@ namespace DetectNetworkChanges.Objects
                 && this.IsConnected == other.IsConnected
                 && this.IsConnectedToInternet == other.IsConnectedToInternet
                 && this.netID == other.netID
-                && this.NetworkName == other.NetworkName                
+                && this.NetworkName == other.NetworkName     
+                //&& this.LinkSpeed == other.LinkSpeed 
                 )
             {
                 return true;

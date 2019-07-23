@@ -1,2 +1,8 @@
+0.9.0.1 2019-07-22 RC
+* Added link speed checking
+* Fixed issue with notifications not always appearing as expected
+* Added Reset Settings function
+
+
 0.9.0.0 2019-07-15 RC
 * Created.

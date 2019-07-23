@@ -130,5 +130,29 @@ namespace DetectNetworkChanges.Properties {
                 this["AdapterID"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("150")]
+        public int LinkSpeedMin {
+            get {
+                return ((int)(this["LinkSpeedMin"]));
+            }
+            set {
+                this["LinkSpeedMin"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LinkSpeedCheck {
+            get {
+                return ((bool)(this["LinkSpeedCheck"]));
+            }
+            set {
+                this["LinkSpeedCheck"] = value;
+            }
+        }
     }
 }

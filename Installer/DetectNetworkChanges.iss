@@ -3,9 +3,9 @@
 
 #define MyAppName "Detect Network Changes"
 ;#define MyAppNameSHORT "RRR"
-#define MyAppVersion "0.9.0.0_RC"           
+#define MyAppVersion "0.9.0.1_RC"           
 #define MyAppPublisher "Strangetimez"
-#define MyAppURL "http://www.strangetimez.com/Blog/?page_id=478"
+#define MyAppURL "https://www.strangetimez.com/Blog/detect-network-changes-application/"
 #define MyAppExeName "DetectNetworkChanges.exe"
 #define MyAppDataPathName "DetectNetworkChanges"
              

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows.Forms;
 using System.Media;
-
+using System.Reflection;
 
 namespace DetectNetworkChanges
 {
@@ -18,7 +18,7 @@ namespace DetectNetworkChanges
         /// <summary>
         /// Tells the rest of the app that the form is closing
         /// </summary>
-        internal Boolean formClosing = false;
+        internal Boolean IsFormClosing = false;
 
         /// <summary>
         /// Flag when a problem is found - network difference found
@@ -28,29 +28,24 @@ namespace DetectNetworkChanges
         /// <summary>
         /// Flag for when an event detects a network change
         /// </summary>
-        internal Boolean networkChanged = false;
+        internal Boolean NetworkChanged = false;
 
         /// <summary>
         /// The value found when checking the current network state
         /// </summary>
-        NetworkSummary currentNS;
+        NetworkSummary CurrentNS;
 
         /// <summary>
         /// The value stored when the app starts, or a different network is selected
         /// </summary>
-        NetworkSummary checkNS;
+        NetworkSummary CheckNS;
 
 
 
         public frmMain()
         {
             InitializeComponent();
-        }
 
-
-
-        private void frmMain_Load(object sender, EventArgs e)
-        {
             // upgrade settings if a new version of the app is run
             //https://stackoverflow.com/questions/534261/how-do-you-keep-user-config-settings-across-different-assembly-versions-in-net/534335#534335
             if (Properties.Settings.Default.UpgradeRequired)
@@ -60,13 +55,32 @@ namespace DetectNetworkChanges
                 Properties.Settings.Default.Save();
             }
 
+            Initialise();
+
+        }
+
+
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            // Do Nothing
+        }
+               
+
+        /// <summary>
+        /// Set initial values
+        /// Used on startup and reset settings
+        /// </summary>
+        private void Initialise()
+        {
+
             ProblemFound = false;
 
-            checkNS = new NetworkSummary(Properties.Settings.Default.NetworkToCheck);
-            currentNS = new NetworkSummary(Properties.Settings.Default.NetworkToCheck);
+            CheckNS = new NetworkSummary(Properties.Settings.Default.NetworkToCheck);
+            CurrentNS = new NetworkSummary(Properties.Settings.Default.NetworkToCheck);
 
-            setFormValues();
-            updateCurrentNetworkInfo();
+            SetFormValues();
+            UpdateCurrentNetworkInfo();
             updateLastChecked();
 
             doMainTimerTick(); // do first pass to set the screen
@@ -80,28 +94,33 @@ namespace DetectNetworkChanges
             this.FormClosing += FrmMain_FormClosing;
             this.Resize += FrmMain_Resize;
             this.notifyIcon1.MouseClick += NotifyIcon1_MouseClick;
+            this.numLinkSpeedMin.KeyUp += NumLinkSpeedMin_KeyUp;
+            this.numCheckSecs.KeyUp += NumCheckSecs_KeyUp;
+            this.notifyIcon1.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
 
             if (Properties.Settings.Default.StartMinimized)
             {
-                this.WindowState = FormWindowState.Minimized;
-                //this.ShowInTaskbar = false;
-
-                this.Hide();
+                //this.WindowState = FormWindowState.Minimized;
+                //this.Hide();
             }
         }
+
+
+
+
 
 
         #region Handlers
 
         private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
         {
-            networkChanged = true;
+            NetworkChanged = true;
         }
 
 
         private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
-            networkChanged = true;
+            NetworkChanged = true;
         }
 
 
@@ -110,16 +129,13 @@ namespace DetectNetworkChanges
             //https://stackoverflow.com/questions/7625421/minimize-app-to-system-tray
             if (FormWindowState.Minimized == this.WindowState)
             {
-                notifyIcon1.Visible = true;
-                //notifyIcon1.BalloonTipText = "Detect Network Changes running...";
-                //notifyIcon1.ShowBalloonTip(500);
                 ShowInTaskbar = false;
                 this.Hide();
             }
             else if (FormWindowState.Normal == this.WindowState)
             {
-                notifyIcon1.Visible = false;
                 ShowInTaskbar = true;
+                this.BringToFront();
             }
         }
 
@@ -128,24 +144,17 @@ namespace DetectNetworkChanges
         {
             doMainTimerTick();
         }
-
-
-        private void numCheckSecs_ValueChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.CheckSeconds = (int)numCheckSecs.Value;
-            Properties.Settings.Default.Save();
-            tmrMain.Interval = Properties.Settings.Default.CheckSeconds * 1000;
-        }
-
+                       
 
         private void cbNetwork_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cbNetwork.SelectedItem == null) return;
 
-            if (Properties.Settings.Default.NetworkToCheck != cbNetwork.SelectedItem.ToString())
+            if (Properties.Settings.Default.NetworkToCheck != cbNetwork.SelectedItem.ToString() && !String.IsNullOrEmpty(cbNetwork.SelectedItem.ToString()))
             {
                 btnSetNetwork.Enabled = true;
                 btnSetNetwork.Text = "Set Network Info";
+                setNetwork();
             }
             else
             {
@@ -158,21 +167,7 @@ namespace DetectNetworkChanges
         {
             if (string.IsNullOrEmpty(Properties.Settings.Default.NetworkToCheck)) return;
 
-            Properties.Settings.Default.NetworkToCheck = cbNetwork.SelectedItem.ToString();
-            Properties.Settings.Default.Save();
-
-            btnSetNetwork.Text = "Working...";
-            btnSetNetwork.Enabled = false;
-            cbNetwork.Enabled = false;
-
-            ComboboxItemCustom selectedItem = (ComboboxItemCustom)cbNetwork.SelectedItem;
-
-            checkNS = new NetworkSummary(Guid.Parse(selectedItem.Name));
-
-            doMainTimerTick();
-
-            cbNetwork.Enabled = true;
-            btnSetNetwork.Text = "Set Network Info";
+            setNetwork();
 
         }
 
@@ -185,25 +180,27 @@ namespace DetectNetworkChanges
 
         private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
         {
-            // Do Nothing
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
         }
 
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            notifyIcon1.Visible = false;
+            //notifyIcon1.Visible = false;
 
-            if (e.CloseReason == CloseReason.WindowsShutDown && formClosing == false)
+            if (e.CloseReason == CloseReason.WindowsShutDown && IsFormClosing == false)
             {
-                formClosing = true;
+                IsFormClosing = true;
                 Quit();
                 return;
             }
             else
             {
-                if (formClosing == false)
+                if (IsFormClosing == false)
                 {
-                    formClosing = true;
+                    IsFormClosing = true;
 
                     tmrMain.Stop();
 
@@ -211,7 +208,7 @@ namespace DetectNetworkChanges
                         MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                     {
                         e.Cancel = true;
-                        formClosing = false;
+                        IsFormClosing = false;
 
                         tmrMain.Start();
                     }
@@ -234,14 +231,14 @@ namespace DetectNetworkChanges
         {
             Properties.Settings.Default.ShowBalloon = cbShowBalloon.Checked;
             Properties.Settings.Default.Save();
-            checkAlerts();
+            CheckAlerts();
         }
 
         private void cbShowPopup_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.ShowPopup = cbShowPopup.Checked;
             Properties.Settings.Default.Save();
-            checkAlerts();
+            CheckAlerts();
         }
 
 
@@ -256,13 +253,9 @@ namespace DetectNetworkChanges
         {
             if (e.Button == MouseButtons.Left)
             {
-                notifyIcon1.Visible = false;
                 this.Show();
-                WindowState = FormWindowState.Normal;
-                this.ShowInTaskbar = true;
-
+                this.WindowState = FormWindowState.Normal;
                 this.BringToFront();
-                this.Focus();
             }
         }
 
@@ -271,7 +264,7 @@ namespace DetectNetworkChanges
         {
             Properties.Settings.Default.AutoStart = cbAutoStart.Checked;
             Properties.Settings.Default.Save();
-            setStartAutomatically();
+            SetStartAutomatically();
         }
 
 
@@ -304,6 +297,67 @@ namespace DetectNetworkChanges
         }
 
 
+        private void cbCheckLinkSpeed_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.LinkSpeedCheck = cbCheckLinkSpeed.Checked;
+            Properties.Settings.Default.Save();
+            SetLinkCheckControlState();
+        }
+
+
+        private void numLinkSpeedMin_ValueChanged(object sender, EventArgs e)
+        {
+            // Do Nothing
+        }
+
+
+        private void NumLinkSpeedMin_KeyUp(object sender, KeyEventArgs e)
+        {
+            Boolean checkResult = int.TryParse(numLinkSpeedMin.Text, out int linkSpeedMin);
+
+            if (checkResult)
+            {
+                Properties.Settings.Default.LinkSpeedMin = linkSpeedMin;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+
+        private void numCheckSecs_ValueChanged(object sender, EventArgs e)
+        {
+            // Do Nothing
+        }
+
+
+        private void NumCheckSecs_KeyUp(object sender, KeyEventArgs e)
+        {
+            Boolean checkResult = int.TryParse(numCheckSecs.Text, out int checkSeconds);
+
+            if (checkResult)
+            {
+                Properties.Settings.Default.CheckSeconds = checkSeconds;
+                Properties.Settings.Default.Save();
+                tmrMain.Interval = Properties.Settings.Default.CheckSeconds * 1000;
+            }
+        }
+
+
+        private void resetSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tmrMain.Stop();
+            if (MessageBox.Show("Are you sure you want to RESET all settings?", "Reset Settings", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk) == DialogResult.OK)
+            {
+                Properties.Settings.Default.Reset();
+                Properties.Settings.Default.UpgradeRequired = false; // stop the upgrade / passing on of settings in the settings Upgrade process
+                Properties.Settings.Default.Save();
+                Initialise();
+                return;
+            }
+            tmrMain.Start();
+        }
+
+
+
         #endregion
 
 
@@ -325,19 +379,21 @@ namespace DetectNetworkChanges
         /// </summary>
         private void doMainTimerTick()
         {
+            updateLastChecked();
+
             // if no network is selected, dont bother processing
             if (string.IsNullOrEmpty(Properties.Settings.Default.NetworkToCheck)) return;
 
             // if the network change event is fired it sets this flag, update the network list here
-            if (networkChanged)
+            if (NetworkChanged)
             {
-                networkChanged = false;
-                fillNetworkList(Properties.Settings.Default.NetworkToCheck, NetworkConnectivityLevels.All);
+                NetworkChanged = false;
+                FillNetworkList(Properties.Settings.Default.NetworkToCheck, NetworkConnectivityLevels.All);
             }
 
             try
             {
-                currentNS = new NetworkSummary(Properties.Settings.Default.NetworkToCheck);
+                CurrentNS = new NetworkSummary(Properties.Settings.Default.NetworkToCheck);
             }
             catch (Exception)
             {
@@ -345,23 +401,22 @@ namespace DetectNetworkChanges
             }
 
             // display current data
-            updateCurrentNetworkInfo();
-            updateLastChecked();
-
+            UpdateCurrentNetworkInfo();
+            
             // if a problem is found
-            if (!checkNS.Equals(currentNS))
+            if (!CheckNS.Equals(CurrentNS) || !isLinkSpeedOK(CurrentNS))                
             {
                 ProblemFound = true;
                 tmrMain.Stop();
 
                 if (Properties.Settings.Default.PlaySound) SystemSounds.Exclamation.Play();
-                if (Properties.Settings.Default.ShowBalloon) showBalloon("Network Settings have Changed",
+                if (Properties.Settings.Default.ShowBalloon) ShowBalloon("Network Settings have Changed",
                     "Network " + Properties.Settings.Default.NetworkToCheck + " has Changed",
-                    false, 60);
+                    false, Properties.Settings.Default.CheckSeconds);
                 if (Properties.Settings.Default.ShowPopup) MessageBox.Show("Network " + Properties.Settings.Default.NetworkToCheck + " has Changed", "Detect Network Changes", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 notifyIcon1.Icon = new System.Drawing.Icon(Application.StartupPath + @"\Icon_Problem.ico");
-                lblState.Text = "r"; // Webdings X
+                lblState.Text = "r"; // Webdings X / cross
                 lblState.ForeColor = Color.OrangeRed;
                 btnSetNetwork.Enabled = true;
                 btnSetNetwork.Text = "Update Network Info";
@@ -386,26 +441,32 @@ namespace DetectNetworkChanges
 
 
         /// <summary>
+        /// check if the speed is being checked, and if so check that its above the set minimum
+        /// if the speed is NOT being checked, TRUE is returned
+        /// </summary>
+        /// <returns></returns>
+        private Boolean isLinkSpeedOK(NetworkSummary vNS)
+        {
+            // if not checking link speed, then this is okay:
+            if (!Properties.Settings.Default.LinkSpeedCheck) return true;
+            // check link speed:
+            if (vNS.LinkSpeed < Properties.Settings.Default.LinkSpeedMin) return false;
+
+            return true;
+        }
+
+
+        /// <summary>
         /// Show a notification/balloon in Windows
         /// </summary>
         /// <param name="title"></param>
         /// <param name="body"></param>
         /// <param name="vTesting"></param>
         /// <param name="vBalloonShowSeconds"></param>
-        private void showBalloon(string title, string body, Boolean vTesting, int vBalloonShowSeconds)
+        private void ShowBalloon(string title, string body, Boolean vTesting, int vBalloonShowSeconds)
         {
-            //NotifyIcon niBalloon;
-
             try
-            {
-
-                //niBalloon = new NotifyIcon
-                //{
-                //    Icon = new Icon(Application.StartupPath + @"\Icon.ico"),
-                //    Visible = true,
-                //    BalloonTipIcon = ToolTipIcon.None
-                //};
-                notifyIcon1.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
+            {               
 
                 if (title != null)
                 {
@@ -423,7 +484,6 @@ namespace DetectNetworkChanges
                         notifyIcon1.BalloonTipText = " ";
                     }
                 }
-
 
                 notifyIcon1.ShowBalloonTip(vBalloonShowSeconds * 1000);
 
@@ -443,11 +503,11 @@ namespace DetectNetworkChanges
 
         }
 
-
+        
         /// <summary>
         /// Check if all alerts are turned off, and show a message 
         /// </summary>
-        private void checkAlerts()
+        private void CheckAlerts()
         {
             if (cbShowBalloon.Checked == false && cbShowPopup.Checked == false && cbPlaySound.Checked == false)
             {
@@ -459,7 +519,7 @@ namespace DetectNetworkChanges
         /// <summary>
         /// Set the app the auto start when windows starts up
         /// </summary>
-        internal void setStartAutomatically()
+        internal void SetStartAutomatically()
         {
 
             try
@@ -476,7 +536,7 @@ namespace DetectNetworkChanges
                 }
                 else
                 {
-                    if (isAppInRun())
+                    if (IsAppInRun())
                     {
                         // REMOVE KEY
                         rkApp.DeleteValue(appName);
@@ -502,7 +562,7 @@ namespace DetectNetworkChanges
         /// Check if the app is set to auto run in the windows startup
         /// </summary>
         /// <returns></returns>
-        private Boolean isAppInRun()
+        private Boolean IsAppInRun()
         {
             Boolean output = false;
 
@@ -537,16 +597,29 @@ namespace DetectNetworkChanges
         /// <summary>
         /// Set the values from Settings, on the main form
         /// </summary>
-        private void setFormValues()
+        private void SetFormValues()
         {
-            numCheckSecs.Value = Properties.Settings.Default.CheckSeconds;
+            numCheckSecs.Value = Math.Min(Properties.Settings.Default.CheckSeconds, numCheckSecs.Maximum);
             cbAutoStart.Checked = Properties.Settings.Default.AutoStart;
             cbStartMinimised.Checked = Properties.Settings.Default.StartMinimized;
             cbShowBalloon.Checked = Properties.Settings.Default.ShowBalloon;
             cbShowPopup.Checked = Properties.Settings.Default.ShowPopup;
             cbPlaySound.Checked = Properties.Settings.Default.PlaySound;
+            cbCheckLinkSpeed.Checked = Properties.Settings.Default.LinkSpeedCheck;
+            numLinkSpeedMin.Value = Math .Min(Properties.Settings.Default.LinkSpeedMin, numLinkSpeedMin.Maximum);
+            SetLinkCheckControlState();
 
-            fillNetworkList(Properties.Settings.Default.NetworkToCheck, NetworkConnectivityLevels.All);
+            FillNetworkList(Properties.Settings.Default.NetworkToCheck, NetworkConnectivityLevels.All);
+        }
+
+        /// <summary>
+        /// Set the controls for checking the link speed
+        /// </summary>
+        private void SetLinkCheckControlState()
+        {
+            lblWarn.Enabled = Properties.Settings.Default.LinkSpeedCheck;
+            numLinkSpeedMin.Enabled = Properties.Settings.Default.LinkSpeedCheck;
+            lblMbps.Enabled = Properties.Settings.Default.LinkSpeedCheck;
         }
 
 
@@ -555,7 +628,7 @@ namespace DetectNetworkChanges
         /// </summary>
         /// <param name="vSelectedNetworkName"></param>
         /// <param name="vConnectivity"></param>
-        private void fillNetworkList(string vSelectedNetworkName, NetworkConnectivityLevels vConnectivity)
+        private void FillNetworkList(string vSelectedNetworkName, NetworkConnectivityLevels vConnectivity)
         {
             cbNetwork.Items.Clear();
 
@@ -579,20 +652,26 @@ namespace DetectNetworkChanges
                 }
             }
 
+            if (String.IsNullOrEmpty(vSelectedNetworkName))
+            {
+                cbNetwork.Text = "(Select One)";
+            }
+
         }
 
 
         /// <summary>
         /// Update the display of the network info on the form
         /// </summary>
-        private void updateCurrentNetworkInfo()
+        private void UpdateCurrentNetworkInfo()
         {
             // display current data
-            lblAdapterName.Text = String.IsNullOrEmpty(currentNS.AdapterName) ? "(none connected)" : currentNS.AdapterName;
-            lblIPAddress.Text = String.IsNullOrEmpty(currentNS.IPAddress) ? "(none assigned)" : currentNS.IPAddress;
-            lblNetName.Text = currentNS.NetworkName;
-            lblConnected.Text = currentNS.IsConnected ? "Yes" : "No";
-            lblConnectedToInternet.Text = currentNS.IsConnectedToInternet ? "Yes" : "No";
+            lblAdapterName.Text = String.IsNullOrEmpty(CurrentNS.AdapterName) ? "(None Connected)" : CurrentNS.AdapterName;
+            lblIPAddress.Text = String.IsNullOrEmpty(CurrentNS.IPAddress) ? "(None Assigned)" : CurrentNS.IPAddress;
+            lblNetName.Text = String.IsNullOrEmpty(CurrentNS.NetworkName) ? "(None Selected)" : CurrentNS.NetworkName; 
+            lblConnected.Text = CurrentNS.IsConnected ? "Yes" : "No";
+            lblConnectedToInternet.Text = CurrentNS.IsConnectedToInternet ? "Yes" : "No";
+            lblLinkSpeed.Text = (CurrentNS.LinkSpeed).ToString();
         }
 
 
@@ -603,6 +682,31 @@ namespace DetectNetworkChanges
         {
             lblLastChecked.Text = "Last Checked: " + DateTime.Now.ToString("HH:mm:ss");
         }
+
+
+        /// <summary>
+        /// Set the selected network
+        /// </summary>
+        private void setNetwork()
+        {
+            Properties.Settings.Default.NetworkToCheck = cbNetwork.SelectedItem.ToString();
+            Properties.Settings.Default.Save();
+
+            btnSetNetwork.Text = "Working...";
+            btnSetNetwork.Enabled = false;
+            cbNetwork.Enabled = false;
+
+            ComboboxItemCustom selectedItem = (ComboboxItemCustom)cbNetwork.SelectedItem;
+
+            CheckNS = new NetworkSummary(Guid.Parse(selectedItem.Name));
+
+            doMainTimerTick();
+
+            cbNetwork.Enabled = true;
+            btnSetNetwork.Text = "Set Network Info";
+
+        }
+
 
 
         /// <summary>
@@ -632,10 +736,12 @@ namespace DetectNetworkChanges
 
 
 
+
+
+
         #endregion
 
-
-
+        
     }
 
 
