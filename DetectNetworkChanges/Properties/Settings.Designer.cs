@@ -154,5 +154,29 @@ namespace DetectNetworkChanges.Properties {
                 this["LinkSpeedCheck"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SoundFile {
+            get {
+                return ((string)(this["SoundFile"]));
+            }
+            set {
+                this["SoundFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Enabled {
+            get {
+                return ((bool)(this["Enabled"]));
+            }
+            set {
+                this["Enabled"] = value;
+            }
+        }
     }
 }

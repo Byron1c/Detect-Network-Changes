@@ -1,3 +1,11 @@
+0.9.1.0 2019-07-30 RC
+* Updated to .NET 4.8
+* Added checking for new version
+* Added custom sound control
+* Enable / disable function 
+* Manual refresh button
+
+
 0.9.0.1 2019-07-22 RC
 * Added link speed checking
 * Fixed issue with notifications not always appearing as expected

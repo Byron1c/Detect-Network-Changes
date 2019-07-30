@@ -9,6 +9,10 @@ using System.Net.NetworkInformation;
 using System.Windows.Forms;
 using System.Media;
 using System.Reflection;
+using System.Globalization;
+using System.Text;
+using System.Net;
+using System.IO;
 
 namespace DetectNetworkChanges
 {
@@ -81,12 +85,6 @@ namespace DetectNetworkChanges
 
             SetFormValues();
             UpdateCurrentNetworkInfo();
-            updateLastChecked();
-
-            doMainTimerTick(); // do first pass to set the screen
-
-            tmrMain.Interval = Properties.Settings.Default.CheckSeconds * 1000;
-            tmrMain.Start();
 
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
             NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
@@ -97,13 +95,29 @@ namespace DetectNetworkChanges
             this.numLinkSpeedMin.KeyUp += NumLinkSpeedMin_KeyUp;
             this.numCheckSecs.KeyUp += NumCheckSecs_KeyUp;
             this.notifyIcon1.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
+            this.soundPlayer1.FileChangeDetected += SoundPlayer1_FileChangeDetected;
+            this.soundPlayer1.Volume = 95;
 
             if (Properties.Settings.Default.StartMinimized)
             {
-                //this.WindowState = FormWindowState.Minimized;
-                //this.Hide();
+                this.WindowState = FormWindowState.Minimized;
+                this.Hide();
+                ShowInTaskbar = false;
             }
+
+            if (IsUpdateAvailable())
+            {
+                lblUpdateAvailable.Visible = true;
+            }
+
+            doMainTimerTick(true); // do first pass to set the screen
+
+            tmrMain.Interval = Properties.Settings.Default.CheckSeconds * 1000;
+            tmrMain.Start();
+
         }
+
+
 
 
 
@@ -129,12 +143,12 @@ namespace DetectNetworkChanges
             //https://stackoverflow.com/questions/7625421/minimize-app-to-system-tray
             if (FormWindowState.Minimized == this.WindowState)
             {
-                ShowInTaskbar = false;
+                //ShowInTaskbar = false;
                 this.Hide();
             }
             else if (FormWindowState.Normal == this.WindowState)
             {
-                ShowInTaskbar = true;
+                //ShowInTaskbar = true;
                 this.BringToFront();
             }
         }
@@ -142,7 +156,7 @@ namespace DetectNetworkChanges
 
         private void tmrMain_Tick(object sender, EventArgs e)
         {
-            doMainTimerTick();
+            doMainTimerTick(false);
         }
                        
 
@@ -253,9 +267,18 @@ namespace DetectNetworkChanges
         {
             if (e.Button == MouseButtons.Left)
             {
-                this.Show();
-                this.WindowState = FormWindowState.Normal;
-                this.BringToFront();
+                if (this.WindowState == FormWindowState.Normal)
+                {
+                    this.WindowState = FormWindowState.Minimized;
+                    ShowInTaskbar = false;
+                }
+                else
+                {
+                    this.Show();
+                    this.WindowState = FormWindowState.Normal;
+                    ShowInTaskbar = true;              
+                }
+                
             }
         }
 
@@ -294,6 +317,8 @@ namespace DetectNetworkChanges
         {
             Properties.Settings.Default.PlaySound = cbPlaySound.Checked;
             Properties.Settings.Default.Save();
+            soundPlayer1.Enabled = Properties.Settings.Default.PlaySound;
+            SetSoundControl();
         }
 
 
@@ -357,6 +382,53 @@ namespace DetectNetworkChanges
         }
 
 
+        /// <summary>
+        /// Update the settings sound filename when the sound control's file changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SoundPlayer1_FileChangeDetected(object sender, Strangetimez.Objects.FileDetectEventArgs e)
+        {
+            // store the filename incase its changed
+            Properties.Settings.Default.SoundFile = e.Filename;
+            Properties.Settings.Default.Save();
+        }
+
+
+        private void checkForUpdateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckForAppUpdate(true);
+        }
+
+
+        private void lblUpdateAvailable_Click(object sender, EventArgs e)
+        {
+            OpenAppURL();
+        }
+
+
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            doMainTimerTick(true);
+        }
+
+
+        private void enableToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetEnabled(true);
+        }
+
+        private void disableToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetEnabled(false);
+        }
+
+        private void cbEnabled_CheckedChanged(object sender, EventArgs e)
+        {
+            SetEnabled(cbEnabled.Checked);
+        }
+
+
 
         #endregion
 
@@ -377,8 +449,11 @@ namespace DetectNetworkChanges
         /// <summary>
         /// Main timer function for checking and processing network checks
         /// </summary>
-        private void doMainTimerTick()
+        private void doMainTimerTick(Boolean vManualRefresh)
         {
+            // dont do anything if the app is disabled, and not a manual refresh 
+            if (!Properties.Settings.Default.Enabled && !vManualRefresh) return;
+
             updateLastChecked();
 
             // if no network is selected, dont bother processing
@@ -409,7 +484,11 @@ namespace DetectNetworkChanges
                 ProblemFound = true;
                 tmrMain.Stop();
 
-                if (Properties.Settings.Default.PlaySound) SystemSounds.Exclamation.Play();
+                if (Properties.Settings.Default.PlaySound)
+                {
+                    soundPlayer1.StopSound();
+                    soundPlayer1.PlaySound();
+                }
                 if (Properties.Settings.Default.ShowBalloon) ShowBalloon("Network Settings have Changed",
                     "Network " + Properties.Settings.Default.NetworkToCheck + " has Changed",
                     false, Properties.Settings.Default.CheckSeconds);
@@ -607,10 +686,17 @@ namespace DetectNetworkChanges
             cbPlaySound.Checked = Properties.Settings.Default.PlaySound;
             cbCheckLinkSpeed.Checked = Properties.Settings.Default.LinkSpeedCheck;
             numLinkSpeedMin.Value = Math .Min(Properties.Settings.Default.LinkSpeedMin, numLinkSpeedMin.Maximum);
+            
+            SetEnabled(Properties.Settings.Default.Enabled); 
+
+            soundPlayer1.Filename = Properties.Settings.Default.SoundFile;
+
             SetLinkCheckControlState();
+            SetSoundControl();
 
             FillNetworkList(Properties.Settings.Default.NetworkToCheck, NetworkConnectivityLevels.All);
         }
+
 
         /// <summary>
         /// Set the controls for checking the link speed
@@ -675,6 +761,11 @@ namespace DetectNetworkChanges
         }
 
 
+        private void SetSoundControl()
+        {
+            soundPlayer1.Enabled = Properties.Settings.Default.PlaySound;
+        }
+
         /// <summary>
         /// Update the info on when the check was last run
         /// </summary>
@@ -700,12 +791,235 @@ namespace DetectNetworkChanges
 
             CheckNS = new NetworkSummary(Guid.Parse(selectedItem.Name));
 
-            doMainTimerTick();
+            doMainTimerTick(true);
 
             cbNetwork.Enabled = true;
             btnSetNetwork.Text = "Set Network Info";
 
         }
+
+
+        /// <summary>
+        /// Check for version updates
+        /// </summary>
+        /// <param name="vShowWhenOkay"></param>
+        private void CheckForAppUpdate(Boolean vShowWhenOkay)
+        {
+            if (CurrentNS.IsConnectedToInternet == false)
+            {
+                return;
+            }
+
+            //http://www.csharp-station.com/HowTo/HttpWebFetch.aspx
+
+            int currentVersion = int.Parse("0" + this.GetType().Assembly.GetName().Version.ToString().Replace(".", ""), CultureInfo.InvariantCulture);
+            int latestVersion = 0;
+            string versionString = string.Empty;
+            string latestChanges = string.Empty;
+
+            try
+            {
+                versionString = GetLatestVersionNumber();
+                latestChanges = GetLatestChanges();
+                latestVersion = int.Parse("0" + versionString.Replace(".", ""), CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                //ProcessError(ex, ErrorMessageType.CheckForUpdate, ShowError.NoShow, ThrowError.Throw, String.Format(CultureInfo.InvariantCulture, ""), FileFunctions.GetErrorLogFullPath());
+            }
+
+
+            if (latestVersion > currentVersion)
+            {
+                DialogResult result = MessageBox.Show("Detect Network Changes\n\nNew Version Available: " + versionString + "\n\nWould you like to download it?", "New Version Available", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+
+                if (result == System.Windows.Forms.DialogResult.Yes
+                    || result == System.Windows.Forms.DialogResult.OK)
+                {
+                    OpenAppURL();
+                }
+            }
+            else if (latestVersion < currentVersion)
+            {
+                if (vShowWhenOkay) MessageBox.Show("This version is NEWER than the official release.\n\nYou are very Cool :)\n\nRecent Changes:\n\n" + latestChanges, "Version " + versionString, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                if (vShowWhenOkay)
+                {
+
+                    MessageBox.Show("Detect Network Changes is up-to-date.", "No Updates", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                }
+
+            }
+        }
+
+
+        /// <summary>
+        /// check for an update to the application
+        /// </summary>
+        /// <returns>True if a newer version is found</returns>
+        internal Boolean IsUpdateAvailable()
+        {
+            if (CurrentNS.IsConnectedToInternet == false)
+            {
+                return false;
+            }
+
+            //http://www.csharp-station.com/HowTo/HttpWebFetch.aspx
+
+            int currentVersion = int.Parse("0" + this.GetType().Assembly.GetName().Version.ToString().Replace(".", ""), CultureInfo.InvariantCulture);
+            int latestVersion = 0;
+            string versionString = string.Empty;
+            string latestChanges = string.Empty;
+
+            try
+            {
+                versionString = GetLatestVersionNumber();
+                latestChanges = GetLatestChanges();
+                latestVersion = int.Parse("0" + versionString.Replace(".", ""), CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                //ProcessError(ex, ErrorMessageType.CheckForUpdate, ShowError.NoShow, ThrowError.Throw, String.Format(CultureInfo.InvariantCulture, ""), FileFunctions.GetErrorLogFullPath());
+            }
+
+
+            if (latestVersion > currentVersion)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
+        internal static void OpenAppURL()
+        {
+            System.Diagnostics.Process.Start("https://www.strangetimez.com/Blog/detect-network-changes-application/"); //TODO: create a blog page and put the link here
+        }
+
+
+        public string GetLatestVersionNumber()
+        {
+            return GetWebData(new Uri("https://www.strangetimez.com/Apps/DetectNetworkChanges/latestversion.txt"));
+        }
+
+
+        public string GetLatestChanges()
+        {
+            return GetWebData(new Uri("https://www.strangetimez.com/Apps/DetectNetworkChanges/latestchanges.txt"));
+        }
+
+
+        public string GetWebData(Uri vURI)
+        {
+            // used to build entire input
+            StringBuilder sb = new StringBuilder();
+
+            try
+            {
+                if (CurrentNS.IsConnectedToInternet == false)
+                {
+                    return string.Empty;
+                }
+
+                // used on each read operation
+                byte[] buf = new byte[8192];
+
+                // prepare the web page we will be asking for
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(vURI);//("https://www.strangetimez.com/Apps/DetectNetworkChanges/latestversion.txt");
+
+                // execute the request
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+                // we will read data via the response stream
+                Stream resStream = response.GetResponseStream();
+
+                string tempString = null;
+                int count = 0;
+
+                do
+                {
+                    // fill the buffer with data
+                    count = resStream.Read(buf, 0, buf.Length);
+
+                    // make sure we read some data
+                    if (count != 0)
+                    {
+                        // translate from bytes to ASCII text
+                        tempString = Encoding.ASCII.GetString(buf, 0, count);
+
+                        // continue building the string
+                        sb.Append(tempString);
+                    }
+                }
+                while (count > 0); // any more data to read?
+
+            }
+            catch (NetworkInformationException ex)
+            {
+             //   ProcessError(ex, ErrorMessageType.GetWebData, ShowError.NoShow, ThrowError.NoThrow, String.Format(CultureInfo.InvariantCulture, ""), FileFunctions.GetErrorLogFullPath());
+            }
+            catch (TimeoutException ex)
+            {
+               // ProcessError(ex, ErrorMessageType.GetWebData, ShowError.NoShow, ThrowError.NoThrow, String.Format(CultureInfo.InvariantCulture, ""), FileFunctions.GetErrorLogFullPath());
+            }
+            catch (System.Net.WebException ex)
+            {
+                //ProcessError(ex, ErrorMessageType.GetWebData, ShowError.NoShow, ThrowError.NoThrow, String.Format(CultureInfo.InvariantCulture, ""), FileFunctions.GetErrorLogFullPath());
+            }
+            catch (ProtocolViolationException ex)
+            {
+                //ProcessError(ex, ErrorMessageType.GetWebData, ShowError.NoShow, ThrowError.NoThrow, String.Format(CultureInfo.InvariantCulture, ""), FileFunctions.GetErrorLogFullPath());
+            }
+            catch (System.Net.Sockets.SocketException ex)
+            {
+                //ProcessError(ex, ErrorMessageType.GetWebData, ShowError.NoShow, ThrowError.NoThrow, String.Format(CultureInfo.InvariantCulture, ""), FileFunctions.GetErrorLogFullPath());
+            }
+
+
+            // print out page source
+            return sb.ToString();
+
+        }
+
+
+        /// <summary>
+        /// Set the state of the app 
+        /// </summary>
+        /// <param name="vEnabled"></param>
+        private void SetEnabled(Boolean vEnabled)
+        {
+            cbEnabled.Checked = vEnabled;
+
+            if (vEnabled)
+            {
+                enableToolStripMenuItem.Visible = false;
+                disableToolStripMenuItem.Visible = true;
+                Properties.Settings.Default.Enabled = true;
+                Properties.Settings.Default.Save();
+
+                pnlDetails.Enabled = true;
+
+            }
+            else
+            {
+                // disabled
+                enableToolStripMenuItem.Visible = true;
+                disableToolStripMenuItem.Visible = false;
+                Properties.Settings.Default.Enabled = false;
+                Properties.Settings.Default.Save();
+
+                pnlDetails.Enabled = false;
+            }
+
+            doMainTimerTick(true);
+
+        }
+
+
 
 
 
@@ -736,6 +1050,7 @@ namespace DetectNetworkChanges
 
 
 
+        
 
 
 
